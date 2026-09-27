@@ -5,48 +5,70 @@
 <p align="center">
   <em>Built for the lablab.ai "Back for Another Hack: Meet IBM Bob 2.0" Hackathon</em>
 </p>
+
 # Project Argus
 
-A live DevOps health graph that brings alerts, logs, traces, and events from different tools into one view. Instead of checking each system separately, Argus shows how failures are connected and how an incident moves through the pipeline.
+**Argus** is a live DevOps health map and incident intelligence dashboard. It aggregates alerts, logs, traces, and events from different tools into a single, unified view. Instead of debugging systems in isolation, Argus visualizes how failures are connected and how incidents propagate through your pipeline in real-time.
 
 ## 🚀 Quick Start
 
-### Backend
+The project consists of a Python FastAPI backend and a modern Next.js frontend.
+
+### 1. Backend Setup
+
+The backend serves the graph topology, correlation engine, and incident states on port `8090`.
 
 ```bash
+# 1. Create a virtual environment
 cd backend
-
 python -m venv venv
 
-# Windows
-venv\Scripts\activate
-
-# Linux / macOS
+# 2. Activate it
+# Linux / macOS:
 source venv/bin/activate
+# Windows:
+# venv\Scripts\activate
 
+# 3. Install dependencies
 pip install -r requirements.txt
 
-# Run from the project root (not from backend/)
+# 4. Run the API (from the project root)
 cd ..
-uvicorn backend.api.main:app --reload --port 8090
+uvicorn backend.api.main:app --host 0.0.0.0 --port 8090 --reload
 ```
 
-### Frontend
+### 2. Frontend Setup
+
+The frontend is a modern Next.js application located in the `final_front_end` directory.
 
 ```bash
-cd frontend
-python -m http.server 5173
+# Open a new terminal instance
+cd final_front_end
+
+# Install dependencies (using pnpm)
+pnpm install
+
+# Start the development server
+pnpm dev -p 3000
 ```
 
-Open the frontend at `http://localhost:5173`.
+Open your browser to `http://localhost:3000` to view the dashboard!
+
+## 🧪 Interactive Demo Features
+
+Argus includes built-in demo endpoints to simulate real-time incidents and resolutions right on the dashboard:
+
+- **Simulate Failure**: Click the `SIMULATE FAILURE` button in the top tools menu to instantly mock a cascading failure across the deployment pipeline. The graph will immediately reflect the degraded health.
+- **View Logs**: Click `VIEW LOGS` on an active incident to open a raw terminal-style modal displaying chronological event traces and root cause metadata.
+- **Open Runbook**: Click `OPEN RUNBOOK` to view remediation steps. You can click `RESOLVE INCIDENT` inside the runbook to mark the system healthy again.
+- **Light/Dark Mode**: Seamlessly toggle themes using the Moon/Sun icon in the top right.
+- **Mock Settings**: Click the gear icon to view mocked AI auto-remediation toggles designed for the IBM Bob integration.
 
 ## 🎯 How It Works
 
-Argus collects events from different parts of the DevOps environment and converts them into a common format.
+Argus collects events from across the DevOps environment (e.g., CI/CD, Kubernetes, databases) and normalizes them into a common format. 
 
-The correlation engine then looks for related events and groups them into incidents.
-
-For example:
+The deterministic **Correlation Engine** groups related events into a single "Incident".
 
 ```text
 Deploy failed
@@ -58,158 +80,48 @@ Database connection error
 HTTP 500 rate increased
 ```
 
-Instead of showing these as four separate alerts, Argus displays them as one incident with the related events and evidence.
-
-## 📊 Health Map
-
-The main interface is a live graph showing the current state of the system.
-
-* Green nodes are healthy
-* Warning nodes indicate degraded services
-* Red nodes indicate failures
-* Connections show relationships between components
-* Clicking a node displays related incident information
-
-The graph updates as new events are received.
+Instead of drowning in separate alerts, Argus presents a single incident containing all related evidence and a chronological timeline.
 
 ## ✅ Features
 
-* **Live Health Graph** - View the state of the pipeline and its services in one place
-* **Event Correlation** - Group related failures into a single incident
-* **Failure Chains** - See how a failure propagates through dependent components
-* **Incident Details** - View the events, timeline, and evidence behind an incident
-* **Multiple Connectors** - Designed to receive events from different DevOps and monitoring tools
-* **Event Normalization** - Convert different event formats into a common schema
-* **Rule-Based Detection** - Detect incidents using deterministic correlation rules
-* **Interactive Graph** - Explore services and their relationships directly from the UI
-* **AI Explanations** - Optional AI layer for explaining detected incidents in plain English
-
-## 📁 Project Structure
-
-```text
-backend/
-├── connectors/
-│   ├── github_actions.py
-│   ├── kubernetes_mock.py
-│   └── prometheus_mock.py
-├── models/
-│   ├── event.py
-│   └── incident.py
-├── normalizer/
-│   └── normalizer.py
-├── correlation/
-│   └── engine.py
-├── health/
-│   └── health_engine.py
-├── fixtures/
-│   ├── fixture-healthy.json
-│   └── fixture-incident.json
-└── api/
-    └── main.py
-
-frontend/
-├── index.html
-├── graph.js
-└── style.css
-
-tests/
-```
-
-## 🔌 Event Types
-
-The MVP currently supports events such as:
-
-```text
-BUILD_SUCCESS / BUILD_FAILED
-TEST_SUCCESS / TEST_FAILED
-DEPLOY_SUCCESS / DEPLOY_FAILED
-POD_STARTED / POD_FAILED / POD_RESTARTED
-APPLICATION_ERROR
-HIGH_ERROR_RATE
-```
-
-Events follow a common schema:
-
-```json
-{
-  "id": "evt-001",
-  "timestamp": "2026-09-25T14:22:00",
-  "source": "kubernetes",
-  "service": "backend",
-  "event_type": "POD_FAILED",
-  "status": "critical",
-  "details": {
-    "pod": "backend-7d8f",
-    "restarts": 8,
-    "reason": "CrashLoopBackOff"
-  }
-}
-```
-
-## 🔗 API
-
-| Endpoint              | Description                                   |
-| --------------------- | --------------------------------------------- |
-| `GET /graph`          | Current nodes, connections, and health status |
-| `GET /incidents`      | Active incidents                              |
-| `GET /incidents/{id}` | Incident details and evidence                 |
-
-## 🧪 Demo
-
-### Healthy
-
-```text
-Build → Tests → Deploy → Backend → Database
-  🟢      🟢       🟢        🟢         🟢
-```
-
-### Incident
-
-```text
-Deploy 🔴
-    ↓
-Backend 🔴
-    ↓
-Database 🔴
-    ↓
-HTTP 500 🔴
-```
-
-The incident panel shows the events that were detected and the timeline connecting them.
+* **Live Health Graph**: Real-time visualization of the pipeline topology using React Flow and custom SVGs.
+* **Event Correlation**: Group failures into single incidents.
+* **Failure Chains**: See dependency propagation.
+* **Interactive UI**: Shadcn/ui dialogs, dynamic SVGs, and responsive design.
+* **Event Normalization**: Unified schema for disparate tools.
+* **IBM Bob Integration**: Designed to support AI-powered incident explanations and auto-remediation (mocked in UI).
 
 ## 🛠️ Tech Stack
 
-**Backend**
+### Backend
+* **Python 3**
+* **FastAPI** (REST API & WebSockets)
+* **Pydantic**
+* **Uvicorn**
 
-* Python
-* FastAPI
-* Pydantic
-* Uvicorn
+### Frontend
+* **Next.js 16** (App Router)
+* **React**
+* **Tailwind CSS**
+* **Shadcn/ui** (Radix Primitives)
+* **Lucide Icons**
+* **Next-Themes**
 
-**Frontend**
+## 🔗 API Reference
 
-* Vanilla JavaScript
-* Cytoscape.js
-* GSAP
-
-The MVP uses an in-memory store, so no database is required to run the demo.
-
-## 🚧 Current Scope
-
-The current version uses rule-based correlation with one real connector and mocked connectors for the remaining integrations.
-
-The graph currently uses a fixed topology. The connector architecture is designed so that additional tools and event sources can be added later without changing the core correlation engine.
+| Endpoint              | Method | Description                                   |
+| --------------------- | ------ | --------------------------------------------- |
+| `GET /graph`          | GET    | Current nodes, connections, and health status |
+| `GET /incidents`      | GET    | Active incidents                              |
+| `POST /demo/incident` | POST   | Triggers a simulated cascading incident       |
+| `POST /demo/healthy`  | POST   | Resolves active incidents                     |
 
 ## 🗺️ Roadmap
 
-* Add more integrations
-* Support dynamic service dependencies
-* Add logs and traces as correlation sources
-* Store historical incidents
-* Add more advanced correlation rules
-* Add AI-powered incident explanations
-* Add natural language investigation
+- [ ] Complete live IBM Bob integration for natural language investigation.
+- [ ] Add dynamic service dependency mapping.
+- [ ] Incorporate distributed tracing (OpenTelemetry).
+- [ ] Persist historical incidents to a Postgres database.
 
 ---
-
-Built for the **lablab.ai "Back for Another Hack: Meet IBM Bob 2.0" Hackathon**.
+*Built for the **lablab.ai "Back for Another Hack: Meet IBM Bob 2.0" Hackathon**.*

@@ -1,0 +1,83 @@
+[
+  {
+    "id": "evt-h-001",
+    "timestamp": "2026-09-25T14:00:00",
+    "source": "github_actions",
+    "service": "build",
+    "event_type": "BUILD_SUCCESS",
+    "status": "ok",
+    "details": {
+      "workflow": "CI/CD Pipeline",
+      "run_id": "10001",
+      "branch": "main",
+      "commit": "abc1234"
+    }
+  },
+  {
+    "id": "evt-h-002",
+    "timestamp": "2026-09-25T14:02:00",
+    "source": "github_actions",
+    "service": "tests",
+    "event_type": "TEST_SUCCESS",
+    "status": "ok",
+    "details": {
+      "workflow": "CI/CD Pipeline",
+      "run_id": "10001",
+      "passed": 142,
+      "failed": 0
+    }
+  },
+  {
+    "id": "evt-h-003",
+    "timestamp": "2026-09-25T14:05:00",
+    "source": "github_actions",
+    "service": "deploy",
+    "event_type": "DEPLOY_SUCCESS",
+    "status": "ok",
+    "details": {
+      "workflow": "CI/CD Pipeline",
+      "run_id": "10001",
+      "environment": "production"
+    }
+  },
+  {
+    "id": "evt-h-004",
+    "timestamp": "2026-09-25T14:06:00",
+    "source": "kubernetes",
+    "service": "backend",
+    "event_type": "POD_STARTED",
+    "status": "ok",
+    "details": {
+      "pod": "backend-6f9c",
+      "namespace": "production",
+      "restarts": 0
+    }
+  },
+  {
+    "id": "evt-h-005",
+    "timestamp": "2026-09-25T14:06:30",
+    "source": "kubernetes",
+    "service": "database",
+    "event_type": "POD_STARTED",
+    "status": "ok",
+    "details": {
+      "pod": "postgres-5a2b",
+      "namespace": "production",
+      "restarts": 0
+    }
+  },
+  {
+    "id": "evt-h-006",
+    "timestamp": "2026-09-25T14:07:00",
+    "source": "prometheus",
+    "service": "backend",
+    "event_type": "BUILD_SUCCESS",
+    "status": "ok",
+    "details": {
+      "http_500_rate": 0.0,
+      "avg_latency_ms": 45,
+      "cpu_percent": 18,
+      "memory_percent": 32
+    }
+  }
+]

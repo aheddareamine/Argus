@@ -5,209 +5,77 @@
 <p align="center">
   <em>Built for the lablab.ai "Back for Another Hack: Meet IBM Bob 2.0" Hackathon</em>
 </p>
+
 # Project Argus
 
-A live DevOps health graph that brings alerts, logs, traces, and events from different tools into one view. Instead of checking each system separately, Argus shows how failures are connected and how an incident moves through the pipeline.
+A live DevOps health graph that brings alerts, logs, traces, and events from different tools into one unified topology view. Instead of checking GitHub Actions, Docker, Kubernetes, and Prometheus separately, Argus correlates cascading failures and visualizes how an incident moves through your pipeline.
 
-## 🚀 Quick Start
+## 🚀 Quick Start (Demo Mode)
 
-### Backend
+We have built a single-command demo that automatically provisions a mock project, detects its DevOps tools, and spawns the live topology map.
 
-```bash
-cd backend
+1. Ensure you have Node.js and Python 3 installed.
+2. From the root of the repository, build the frontend once:
+   ```bash
+   cd frontend
+   npm install
+   npm run build
+   cd ..
+   ```
+3. Set up the Python environment and install the Argus CLI:
+   ```bash
+   python3 -m venv backend/venv
+   source backend/venv/bin/activate
+   pip install -r backend/requirements.txt
+   pip install -e argus-cli
+   ```
+4. Run the demo script! This will spawn the backend, push simulated incident events, and provide you with a link to the UI.
+   ```bash
+   ./demo-project/run_demo.sh
+   ```
+5. Click the link provided in the terminal (usually `http://localhost:8090`) to view the glowing topology map!
 
-python -m venv venv
+## 🚧 Current Status & Future Improvements
 
-# Windows
-venv\Scripts\activate
+This project was built rapidly during the hackathon. While the core vision is functional, there are several areas we are currently working on improving:
 
-# Linux / macOS
-source venv/bin/activate
+### Frontend Needs Improvement
+- **Responsive Design & Scaling:** The Cytoscape canvas and glassmorphic sidebar are currently optimized for desktop views. Mobile responsiveness and smoother zooming/panning controls need refinement.
+- **Deeper Interactivity:** Clicking nodes currently opens a static incident sidebar. We plan to add deeper drill-downs (e.g., viewing raw logs, restarting pods directly from the UI).
 
-pip install -r requirements.txt
-
-uvicorn api.main:app --reload --port 8000
-```
-
-### Frontend
-
-```bash
-cd frontend
-python -m http.server 5173
-```
-
-Open the frontend at `http://localhost:5173`.
+### Backend Needs to be Fully Dynamic
+- **Dynamic Topology Inference:** Currently, the Argus CLI detects tools and creates the pipeline stages dynamically, but the backend correlation engine still relies heavily on predefined rules for the "demo" topology. We are working on making the backend automatically infer dependencies and rules strictly from live data without hardcoded fallbacks.
+- **Real-time Connectors:** The `argus-cli` correctly detects real configuration files in repositories, but the active incident stream currently relies on simulated mock data to demonstrate failure correlation. Future updates will connect fully to live Kubernetes and Prometheus APIs.
 
 ## 🎯 How It Works
 
-Argus collects events from different parts of the DevOps environment and converts them into a common format.
+`argus-cli` scans project files (`.github/workflows/`, `Dockerfile`, `k8s/`, `prometheus.yml`) to infer active tools and stage order. It sends raw events to the FastAPI backend, which normalizes them into standard Event objects.
 
 The correlation engine then looks for related events and groups them into incidents.
 
 For example:
-
 ```text
 Deploy failed
      ↓
-Service failed
+Backend Pod failed
      ↓
 Database connection error
      ↓
 HTTP 500 rate increased
 ```
-
-Instead of showing these as four separate alerts, Argus displays them as one incident with the related events and evidence.
-
-## 📊 Health Map
-
-The main interface is a live graph showing the current state of the system.
-
-* Green nodes are healthy
-* Warning nodes indicate degraded services
-* Red nodes indicate failures
-* Connections show relationships between components
-* Clicking a node displays related incident information
-
-The graph updates as new events are received.
-
-## ✅ Features
-
-* **Live Health Graph** - View the state of the pipeline and its services in one place
-* **Event Correlation** - Group related failures into a single incident
-* **Failure Chains** - See how a failure propagates through dependent components
-* **Incident Details** - View the events, timeline, and evidence behind an incident
-* **Multiple Connectors** - Designed to receive events from different DevOps and monitoring tools
-* **Event Normalization** - Convert different event formats into a common schema
-* **Rule-Based Detection** - Detect incidents using deterministic correlation rules
-* **Interactive Graph** - Explore services and their relationships directly from the UI
-* **AI Explanations** - Optional AI layer for explaining detected incidents in plain English
-
-## 📁 Project Structure
-
-```text
-backend/
-├── connectors/
-│   ├── github_actions.py
-│   ├── kubernetes_mock.py
-│   └── prometheus_mock.py
-├── models/
-│   ├── event.py
-│   └── incident.py
-├── normalizer/
-│   └── normalizer.py
-├── correlation/
-│   └── engine.py
-├── health/
-│   └── health_engine.py
-├── fixtures/
-│   ├── fixture-healthy.json
-│   └── fixture-incident.json
-└── api/
-    └── main.py
-
-frontend/
-├── index.html
-├── graph.js
-└── style.css
-
-tests/
-```
-
-## 🔌 Event Types
-
-The MVP currently supports events such as:
-
-```text
-BUILD_SUCCESS / BUILD_FAILED
-TEST_SUCCESS / TEST_FAILED
-DEPLOY_SUCCESS / DEPLOY_FAILED
-POD_STARTED / POD_FAILED / POD_RESTARTED
-APPLICATION_ERROR
-HIGH_ERROR_RATE
-```
-
-Events follow a common schema:
-
-```json
-{
-  "id": "evt-001",
-  "timestamp": "2026-09-25T14:22:00",
-  "source": "kubernetes",
-  "service": "backend",
-  "event_type": "POD_FAILED",
-  "status": "critical",
-  "details": {
-    "pod": "backend-7d8f",
-    "restarts": 8,
-    "reason": "CrashLoopBackOff"
-  }
-}
-```
-
-## 🔗 API
-
-| Endpoint              | Description                                   |
-| --------------------- | --------------------------------------------- |
-| `GET /graph`          | Current nodes, connections, and health status |
-| `GET /incidents`      | Active incidents                              |
-| `GET /incidents/{id}` | Incident details and evidence                 |
-
-## 🧪 Demo
-
-### Healthy
-
-```text
-Build → Tests → Deploy → Backend → Database
-  🟢      🟢       🟢        🟢         🟢
-```
-
-### Incident
-
-```text
-Deploy 🔴
-    ↓
-Backend 🔴
-    ↓
-Database 🔴
-    ↓
-HTTP 500 🔴
-```
-
-The incident panel shows the events that were detected and the timeline connecting them.
+Instead of showing these as four separate alerts across four different dashboards, Argus displays them as **one incident** with a human-readable evidence chain.
 
 ## 🛠️ Tech Stack
 
-**Backend**
-
-* Python
-* FastAPI
+**Backend & CLI Tool:**
+* Python, FastAPI, Uvicorn
 * Pydantic
-* Uvicorn
+* Custom `argus-cli` tool (Argparse, HTTPX)
 
-**Frontend**
-
-* Vanilla JavaScript
-* Cytoscape.js
-* GSAP
-
-The MVP uses an in-memory store, so no database is required to run the demo.
-
-## 🚧 Current Scope
-
-The current version uses rule-based correlation with one real connector and mocked connectors for the remaining integrations.
-
-The graph currently uses a fixed topology. The connector architecture is designed so that additional tools and event sources can be added later without changing the core correlation engine.
-
-## 🗺️ Roadmap
-
-* Add more integrations
-* Support dynamic service dependencies
-* Add logs and traces as correlation sources
-* Store historical incidents
-* Add more advanced correlation rules
-* Add AI-powered incident explanations
-* Add natural language investigation
+**Frontend:**
+* TypeScript
+* Vite
+* Cytoscape.js (for high-performance graph rendering)
 
 ---
-
 Built for the **lablab.ai "Back for Another Hack: Meet IBM Bob 2.0" Hackathon**.

@@ -16,7 +16,7 @@
 
 ## Phase 1 — Foundation: Models, Fixtures, and Project Scaffold
 
-**Status:** `[ ] pending`
+**Status:** `[x] done`
 
 ### Intent
 Establish the shared data contracts (`Event`, `Incident`, `HealthNode`) that every other layer depends on. Create the two demo fixture files (healthy scenario and incident scenario) that will be used as ground truth throughout development. Set up the project folder structure.
@@ -47,7 +47,7 @@ Establish the shared data contracts (`Event`, `Incident`, `HealthNode`) that eve
 
 ## Phase 2 — Data Pipeline: Connectors and Normalizer
 
-**Status:** `[ ] pending`
+**Status:** `[x] done`
 
 ### Intent
 Build the data-ingestion layer. Each connector fetches raw data from its source (or reads from a fixture in mock mode) and the normalizer converts it into the standard `Event` schema. This layer is the entry point for all data flowing into the system.
@@ -77,7 +77,7 @@ Build the data-ingestion layer. Each connector fetches raw data from its source 
 
 ## Phase 3 — Intelligence: Correlation Engine, Incident Builder, and Health Engine
 
-**Status:** `[ ] pending`
+**Status:** `[x] done`
 
 ### Intent
 This is the core of the project. The correlation engine takes a stream of `Event` objects and applies deterministic rules to group related events into an `Incident`. The health engine then derives a per-service health status from active incidents and recent events.
@@ -107,7 +107,7 @@ This is the core of the project. The correlation engine takes a stream of `Event
 
 ## Phase 4 — API Layer: FastAPI Backend
 
-**Status:** `[ ] pending`
+**Status:** `[x] done`
 
 ### Intent
 Expose the correlation and health results via a clean REST API that the frontend will consume. Wire together all backend modules: connectors → normalizer → correlation engine → health engine → API response.

@@ -1,0 +1,72 @@
+[
+  {
+    "id": "evt-i-001",
+    "timestamp": "2026-09-25T14:20:00",
+    "source": "github_actions",
+    "service": "deploy",
+    "event_type": "DEPLOY_FAILED",
+    "status": "critical",
+    "details": {
+      "workflow": "CI/CD Pipeline",
+      "run_id": "10042",
+      "environment": "production",
+      "reason": "Deployment rollout timed out"
+    }
+  },
+  {
+    "id": "evt-i-002",
+    "timestamp": "2026-09-25T14:21:00",
+    "source": "kubernetes",
+    "service": "backend",
+    "event_type": "POD_FAILED",
+    "status": "critical",
+    "details": {
+      "pod": "backend-7d8f",
+      "namespace": "production",
+      "restarts": 8,
+      "reason": "CrashLoopBackOff"
+    }
+  },
+  {
+    "id": "evt-i-003",
+    "timestamp": "2026-09-25T14:21:15",
+    "source": "kubernetes",
+    "service": "backend",
+    "event_type": "APPLICATION_ERROR",
+    "status": "critical",
+    "details": {
+      "pod": "backend-7d8f",
+      "log": "PostgreSQL connection refused at 10.0.0.5:5432",
+      "occurrences": 8
+    }
+  },
+  {
+    "id": "evt-i-004",
+    "timestamp": "2026-09-25T14:21:30",
+    "source": "kubernetes",
+    "service": "database",
+    "event_type": "DATABASE_CONNECTION_ERROR",
+    "status": "critical",
+    "details": {
+      "pod": "postgres-5a2b",
+      "namespace": "production",
+      "reason": "PostgreSQL connection refused",
+      "host": "10.0.0.5",
+      "port": 5432
+    }
+  },
+  {
+    "id": "evt-i-005",
+    "timestamp": "2026-09-25T14:22:00",
+    "source": "prometheus",
+    "service": "backend",
+    "event_type": "HIGH_ERROR_RATE",
+    "status": "critical",
+    "details": {
+      "http_500_rate": 0.08,
+      "avg_latency_ms": 3200,
+      "threshold": 0.01,
+      "query": "rate(http_requests_total{status='500'}[5m])"
+    }
+  }
+]

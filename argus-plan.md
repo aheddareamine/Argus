@@ -6,7 +6,7 @@
 
 **Goal:** Build a live DevOps Health Map that collects events from GitHub Actions, Kubernetes, and Prometheus, normalises them into a common schema, correlates related failures into incidents, and presents the result as an interactive graph with an AI-generated plain-English explanation.
 
-**Scope:** Full stack — Python/FastAPI backend + Vanilla JS / Cytoscape.js frontend + optional IBM Bob AI layer.
+**Scope:** Full stack — Python/FastAPI backend + Vanilla JS / Cytoscape.js final_front_end + optional IBM Bob AI layer.
 
 **Approach:** Seven sequential phases. Each phase produces a testable, independently runnable slice. Nothing is built on an unverified layer. The MVP uses mock connectors for Kubernetes and Prometheus; only the GitHub Actions connector is real. The AI layer (Phase 6) is additive and does not block the demo.
 
@@ -16,7 +16,7 @@
 
 ## Phase 1 — Foundation: Models, Fixtures, and Project Scaffold
 
-**Status:** `[ ] pending`
+**Status:** `[x] done`
 
 ### Intent
 Establish the shared data contracts (`Event`, `Incident`, `HealthNode`) that every other layer depends on. Create the two demo fixture files (healthy scenario and incident scenario) that will be used as ground truth throughout development. Set up the project folder structure.
@@ -30,7 +30,7 @@ Establish the shared data contracts (`Event`, `Incident`, `HealthNode`) that eve
 - `tests/test_models.py` — unit tests that instantiate both models and validate the fixture files parse without errors
 
 ### Todo List
-1. Create the folder tree: `backend/connectors`, `backend/models`, `backend/normalizer`, `backend/correlation`, `backend/health`, `backend/ai`, `backend/api`, `backend/fixtures`, `tests`, `frontend`
+1. Create the folder tree: `backend/connectors`, `backend/models`, `backend/normalizer`, `backend/correlation`, `backend/health`, `backend/ai`, `backend/api`, `backend/fixtures`, `tests`, `final_front_end`
 2. Write `backend/models/event.py` — `Event` Pydantic model (`id`, `timestamp`, `source`, `service`, `event_type`, `status`, `details: dict`)
 3. Write `backend/models/incident.py` — `Incident` Pydantic model (`id`, `service`, `severity`, `status`, `start_time`, `events: list[Event]`, `possible_cause`, `evidence: list[str]`)
 4. Write `backend/fixtures/fixture-healthy.json` — 6 events: BUILD_SUCCESS, TEST_SUCCESS, DEPLOY_SUCCESS, POD_STARTED, DB connection OK, metrics normal
@@ -47,7 +47,7 @@ Establish the shared data contracts (`Event`, `Incident`, `HealthNode`) that eve
 
 ## Phase 2 — Data Pipeline: Connectors and Normalizer
 
-**Status:** `[ ] pending`
+**Status:** `[x] done`
 
 ### Intent
 Build the data-ingestion layer. Each connector fetches raw data from its source (or reads from a fixture in mock mode) and the normalizer converts it into the standard `Event` schema. This layer is the entry point for all data flowing into the system.
@@ -77,7 +77,7 @@ Build the data-ingestion layer. Each connector fetches raw data from its source 
 
 ## Phase 3 — Intelligence: Correlation Engine, Incident Builder, and Health Engine
 
-**Status:** `[ ] pending`
+**Status:** `[x] done`
 
 ### Intent
 This is the core of the project. The correlation engine takes a stream of `Event` objects and applies deterministic rules to group related events into an `Incident`. The health engine then derives a per-service health status from active incidents and recent events.
@@ -107,10 +107,10 @@ This is the core of the project. The correlation engine takes a stream of `Event
 
 ## Phase 4 — API Layer: FastAPI Backend
 
-**Status:** `[ ] pending`
+**Status:** `[x] done`
 
 ### Intent
-Expose the correlation and health results via a clean REST API that the frontend will consume. Wire together all backend modules: connectors → normalizer → correlation engine → health engine → API response.
+Expose the correlation and health results via a clean REST API that the final_front_end will consume. Wire together all backend modules: connectors → normalizer → correlation engine → health engine → API response.
 
 ### Expected Outcomes
 - `backend/api/main.py` — FastAPI app with three endpoints
@@ -133,7 +133,7 @@ Expose the correlation and health results via a clean REST API that the frontend
 ### Relevant Context
 - API endpoints defined in `README.md` §API table
 - Fixed topology: `Build → Tests → Deploy → Backend → Database` (from `idees.pdf` §15)
-- CORS target is `http://localhost:5173` (frontend dev server port from README)
+- CORS target is `http://localhost:5173` (final_front_end dev server port from README)
 - In-memory store is intentional — no DB for MVP
 
 ---
@@ -143,27 +143,27 @@ Expose the correlation and health results via a clean REST API that the frontend
 **Status:** `[ ] pending`
 
 ### Intent
-Build the interactive UI using Cytoscape.js for the graph and vanilla JS for the incident panel. The frontend polls the API and updates the graph in real time. Clicking a node shows incident details.
+Build the interactive UI using Cytoscape.js for the graph and vanilla JS for the incident panel. The final_front_end polls the API and updates the graph in real time. Clicking a node shows incident details.
 
 ### Expected Outcomes
-- `frontend/index.html` — main page with graph canvas and incident panel
-- `frontend/graph.js` — Cytoscape.js graph initialisation, node coloring by health status, polling loop, click handler
-- `frontend/style.css` — dark-themed UI matching the DevOps tool aesthetic
+- `final_front_end/index.html` — main page with graph canvas and incident panel
+- `final_front_end/graph.js` — Cytoscape.js graph initialisation, node coloring by health status, polling loop, click handler
+- `final_front_end/style.css` — dark-themed UI matching the DevOps tool aesthetic
 - Clicking a node shows the incident panel with: status, events timeline, possible cause, evidence list
 - Two buttons: "Load Healthy" and "Load Incident" that call `POST /demo/{scenario}` and refresh the graph
 - Graph updates within 3 seconds of a demo scenario change
 
 ### Todo List
-1. Write `frontend/index.html` — import Cytoscape.js from CDN; import GSAP from CDN; layout: left panel = graph, right panel = incident details sidebar
-2. Write `frontend/graph.js` — `initGraph()` that calls `GET /graph` and builds Cytoscape nodes/edges; color nodes green/orange/red/grey based on health; `startPolling()` that refreshes every 3s; `onNodeClick(node)` that calls `GET /incidents` filtered by service and populates the sidebar
-3. Write `frontend/style.css` — dark background, green/orange/red node color palette, clean monospace font for incident details
+1. Write `final_front_end/index.html` — import Cytoscape.js from CDN; import GSAP from CDN; layout: left panel = graph, right panel = incident details sidebar
+2. Write `final_front_end/graph.js` — `initGraph()` that calls `GET /graph` and builds Cytoscape nodes/edges; color nodes green/orange/red/grey based on health; `startPolling()` that refreshes every 3s; `onNodeClick(node)` that calls `GET /incidents` filtered by service and populates the sidebar
+3. Write `final_front_end/style.css` — dark background, green/orange/red node color palette, clean monospace font for incident details
 4. Add demo control bar with "Healthy" and "Incident" buttons that `POST /demo/healthy` or `POST /demo/incident` then force an immediate graph refresh
-5. Manual test: run backend, open frontend, click "Incident" button, verify graph turns red on `backend`/`database` nodes and incident panel populates
+5. Manual test: run backend, open final_front_end, click "Incident" button, verify graph turns red on `backend`/`database` nodes and incident panel populates
 
 ### Relevant Context
 - Frontend stack: Vanilla JS + Cytoscape.js + GSAP (`README.md` §Tech Stack)
 - Node states: green = HEALTHY, orange = DEGRADED, red = FAILING, grey = UNKNOWN (`README.md` §Health Map)
-- Serve frontend with `python -m http.server 5173` from the `frontend/` directory
+- Serve final_front_end with `python -m http.server 5173` from the `final_front_end/` directory
 - The graph topology is fixed: `Build → Tests → Deploy → Backend → Database`
 
 ---
@@ -186,7 +186,7 @@ Add an optional AI analyzer that takes a correlated `Incident` and generates a p
 2. Add `explanation: str = ""` field to the `Incident` model
 3. Update the correlation engine to call `explain_incident()` after creating a new incident (async, best-effort)
 4. Update `GET /incidents/{id}` to include `explanation` in the response
-5. Update `frontend/graph.js` incident panel to render the explanation block with a distinct style (e.g. italic, labelled "AI Analysis")
+5. Update `final_front_end/graph.js` incident panel to render the explanation block with a distinct style (e.g. italic, labelled "AI Analysis")
 6. Test: trigger incident scenario, verify explanation text appears in the panel
 
 ### Relevant Context
@@ -216,7 +216,7 @@ Prepare the two demo scenarios for live presentation. Verify the full end-to-end
 1. Run full `pytest tests/` suite — fix any failing tests
 2. Run both demo scenarios end-to-end: healthy → incident → healthy, verify no regressions
 3. Add GSAP pulse animation on newly-failed nodes when switching to incident scenario
-4. Add a "Last updated" timestamp to the frontend so it's clear the graph is live
+4. Add a "Last updated" timestamp to the final_front_end so it's clear the graph is live
 5. Verify `README.md` Quick Start matches actual startup commands
 6. Prepare the two-sentence pitch for the demo: "Argus is an intelligent DevOps correlation layer. It takes four unrelated alerts and tells you: these are one incident, here's why."
 

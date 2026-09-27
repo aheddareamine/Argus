@@ -26,7 +26,9 @@ source venv/bin/activate
 
 pip install -r requirements.txt
 
-uvicorn api.main:app --reload --port 8000
+# Run from the project root (not from backend/)
+cd ..
+uvicorn backend.api.main:app --reload --port 8090
 ```
 
 ### Frontend
